@@ -86,6 +86,18 @@ impl Cluster {
     }
 }
 
+    /// Downloads the IDL for the given program on the given cluster and saves it to a
+    /// local file named `<program_address>.json`.
+    ///
+    /// The function will return an error if:
+    /// - The provided address does not correspond to an executable program
+    /// - The program does not have an associated IDL account
+    /// - The IDL account data is invalid
+    /// - The IDL data cannot be deserialized using serde_json
+    /// - The IDL file cannot be written to disk
+    ///
+    /// This function is only intended to be used for development purposes.
+    ///
 pub fn generate_local_idl(
     program_address: &str,
     cluster: Cluster,
@@ -107,7 +119,6 @@ pub fn generate_local_idl(
 
     // Fetch the IDL from the program (assuming it's stored in a standard location)
     // Note: Anchor stores IDL in a specific account derived from the program ID
-    // Note: Anchor stores IDL in a specific account derived from the program ID
     let idl_address = IdlAccount::address(&program_id);
     let idl_account = client.get_account_data(&idl_address)?;
 
@@ -124,7 +135,6 @@ pub fn generate_local_idl(
         ));
     }
 
-    // Verify the discriminator
     // Verify the discriminator
     // Anchor's discriminator is first 8 bytes of the SHA256 hash of "anchor:idl"
     let disc_bytes = &idl_account[0..8];

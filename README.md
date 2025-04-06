@@ -9,4 +9,4 @@ On the Solana blockchain, download the IDL given an address.
     generate_local_idl(program_address, cluster)?;
 ```
 
-Will generate a local file (_ADcaide4vBtKuyZQqdU689YqEGZMCmS4tL35bdTv9wJa.json_) if successful.
+Downloads the IDL for the given program on the given cluster and saves it to a local file named `<program_address>.json`.
