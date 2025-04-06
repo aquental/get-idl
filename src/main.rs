@@ -1,7 +1,7 @@
 use anchor_lang::idl::IdlAccount;
 use solana_client::rpc_client::RpcClient;
-use solana_sdk::pubkey::ParsePubkeyError;
 use solana_sdk::hash::hash;
+use solana_sdk::pubkey::ParsePubkeyError;
 use std::error::Error as StdError;
 use std::fmt;
 use std::fs::File;
@@ -86,7 +86,10 @@ impl Cluster {
     }
 }
 
-pub fn generate_local_idl(program_address: &str, cluster: Cluster) -> std::result::Result<(), IdlError> {
+pub fn generate_local_idl(
+    program_address: &str,
+    cluster: Cluster,
+) -> std::result::Result<(), IdlError> {
     // Convert program address string to Pubkey
     let program_id = program_address.parse::<solana_sdk::pubkey::Pubkey>()?;
 
@@ -113,12 +116,14 @@ pub fn generate_local_idl(program_address: &str, cluster: Cluster) -> std::resul
     // - Next 32 bytes: authority (Pubkey)
     // - Next 8 bytes: data length (u64)
     // - Remaining bytes: actual IDL data serialized with borsh
-    
+
     // Skip the discriminator (8 bytes)
     if idl_account.len() <= 8 {
-        return Err(IdlError::CustomError("Invalid IDL account data: too short".to_string()));
+        return Err(IdlError::CustomError(
+            "Invalid IDL account data: too short".to_string(),
+        ));
     }
-    
+
     // Verify the discriminator
     // Verify the discriminator
     // Anchor's discriminator is first 8 bytes of the SHA256 hash of "anchor:idl"
@@ -128,21 +133,25 @@ pub fn generate_local_idl(program_address: &str, cluster: Cluster) -> std::resul
         let hash = hash(preimage.as_bytes());
         &hash.to_bytes()[0..8]
     };
-    
+
     if disc_bytes != expected_discriminator {
-        return Err(IdlError::CustomError("Invalid IDL account: wrong discriminator".to_string()));
+        return Err(IdlError::CustomError(
+            "Invalid IDL account: wrong discriminator".to_string(),
+        ));
     }
     // Skip the discriminator and authority bytes (8 + 32 = 40)
     let data_len_bytes = &idl_account[40..48];
     let data_len = u64::from_le_bytes(data_len_bytes.try_into().unwrap()) as usize;
-    
+
     // The actual IDL data starts at byte 48
     if idl_account.len() < 48 + data_len {
-        return Err(IdlError::CustomError("Invalid IDL account data: truncated".to_string()));
+        return Err(IdlError::CustomError(
+            "Invalid IDL account data: truncated".to_string(),
+        ));
     }
-    
+
     let idl_data = &idl_account[48..48 + data_len];
-    
+
     // Deserialize the IDL using serde_json
     let idl: serde_json::Value = serde_json::from_slice(idl_data)
         .map_err(|e| IdlError::CustomError(format!("Failed to parse IDL data: {}", e)))?;
